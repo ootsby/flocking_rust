@@ -13,12 +13,15 @@ pub fn draw_birds_system(
     let borrowed_mesh = world.get_resource(&ResourceNames::BirdMesh).borrow();
     let mesh = borrowed_mesh.cast_mesh();
     let locations = world.query_one(&ComponentNames::Location).borrow();
-    locations.iter().try_for_each(|component| {
+    let velocities = world.query_one(&ComponentNames::Velocity).borrow();
+
+    locations.iter().enumerate().try_for_each(|(index, component)| {
         let location = component.cast_point();
+        let direction = velocities[index].cast_point();
         graphics::draw(
             context,
             mesh,
-            DrawParam::default().dest(location.to_array()),
+            DrawParam::default().rotation(direction.y.atan2(direction.x)).dest(location.to_array()),
         )
     })
 }

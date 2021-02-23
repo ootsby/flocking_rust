@@ -12,7 +12,7 @@ pub fn attraction_system(world: &WorldWrapper) {
         .get_resource(&crate::resource_names::ResourceNames::SightRange)
         .borrow()
         .cast_f32()
-        * 1.25;
+        * 2.0;
     let wrapped_locations = world.query_one(&crate::component_names::ComponentNames::Location);
 
     wrapped_locations
@@ -39,13 +39,13 @@ fn handle_location(
     let location = location.cast_point();
     let boids_near_me = get_boids_near_me(index, other_locations, sight_range);
     if let Some(average_location_of_other_boids) = calculate_average_locations(boids_near_me) {
-        let mut force = *location - average_location_of_other_boids;
+        let mut force = average_location_of_other_boids - *location;
         let mut accelerations = world
             .query_one(&crate::component_names::ComponentNames::Acceleration)
             .deref()
             .borrow_mut();
-        force.normalize();
-        force.multiply_scalar(0.5);
+        let dist = force.normalize();
+        force.multiply_scalar(dist/sight_range);
 
         *accelerations[index].cast_point_mut() += force;
     }

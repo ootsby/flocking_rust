@@ -7,7 +7,7 @@ use bbecs::components::Component;
 use bbecs::resources::resource::Resource;
 use bbecs::world::World;
 use component_names::ComponentNames;
-use ggez::timer;
+use ggez::{mint, timer};
 use ggez::{
     event::EventHandler,
     graphics::{self, DrawMode},
@@ -34,7 +34,7 @@ impl FlockingRustState {
         let background_color = graphics::BLACK;
         let mut world = World::new();
         let bird_mesh = MeshBuilder::new()
-            .circle(DrawMode::fill(), [0.0, 0.0], 5.0, 0.1, graphics::WHITE)
+            .polygon(DrawMode::fill(), &[mint::Point2{x:-4.2, y:-3.5}, mint::Point2{x:5.0, y:0.0}, mint::Point2{x:-4.2, y:3.5}], graphics::WHITE).unwrap()
             .build(context)?;
 
         world.add_resource(

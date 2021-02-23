@@ -8,8 +8,7 @@ pub fn avoidance_system(world: &WorldWrapper) {
     let sight_range = world
         .get_resource(&crate::resource_names::ResourceNames::SightRange)
         .borrow()
-        .cast_f32()
-        * 0.005;
+        .cast_f32();
     let locations = world.query_one(&crate::component_names::ComponentNames::Location);
     let mut accelerations = world
         .query_one(&crate::component_names::ComponentNames::Acceleration)
@@ -31,19 +30,19 @@ pub fn avoidance_system(world: &WorldWrapper) {
                         return;
                     }
                     let other_location = other_location.cast_point();
-                    let distance = *other_location - *my_location;
+                    let distance = *my_location - *other_location;
                     if distance.length() < sight_range {
                         let acceleration = accelerations[index].cast_point_mut();
-                        acceleration.add(&create_avoidance_force(velocities[index].cast_point()));
+                        acceleration.add(&create_avoidance_force(&distance, sight_range));
                     }
                 },
             )
         });
 }
 
-fn create_avoidance_force(velocity: &Point) -> Point {
-    let mut force = velocity.to_perpendicular_right();
-    force.normalize();
-    force.multiply_scalar(0.1);
+fn create_avoidance_force(velocity: &Point, sight_range:f32) -> Point {
+    let mut force = velocity.clone();
+    let dist = force.normalize();
+    force.multiply_scalar(1.0 * (1.0 - dist/sight_range));
     force
 }

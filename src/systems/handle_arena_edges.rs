@@ -21,6 +21,8 @@ pub fn handle_arena_edges_system(world: &World<ComponentNames, ResourceNames>) {
         let acceleration = accelerations[index].cast_point_mut();
 
         let mut force = Point::default();
+        let mut wall_dist = 0.0_f32;
+
         if location.x > arena_size.x - sight_range {
             if velocity.y >= 0.0 {
                 // We are going to turn right
@@ -29,6 +31,7 @@ pub fn handle_arena_edges_system(world: &World<ComponentNames, ResourceNames>) {
                 // We are going to turn left
                 force = velocity.to_perpendicular_left();
             }
+            wall_dist = arena_size.x - location.x;
         } else if location.x < sight_range {
             if velocity.y >= 0.0 {
                 // We are going to turn left because it will be faster to avoid the wall
@@ -37,6 +40,7 @@ pub fn handle_arena_edges_system(world: &World<ComponentNames, ResourceNames>) {
                 // We are going to turn right
                 force = velocity.to_perpendicular_right();
             }
+            wall_dist = location.x;
         }
 
         if location.y < sight_range {
@@ -45,15 +49,17 @@ pub fn handle_arena_edges_system(world: &World<ComponentNames, ResourceNames>) {
             } else {
                 force = velocity.to_perpendicular_left();
             }
+            wall_dist = location.y;
         } else if location.y > arena_size.y - sight_range {
             if velocity.x >= 0.0 {
                 force = velocity.to_perpendicular_left();
             } else {
                 force = velocity.to_perpendicular_right();
             }
+            wall_dist = arena_size.y - location.y;
         }
         force.normalize();
-        force.multiply_scalar(0.1);
+        force.multiply_scalar(3.0 * (1.0 - wall_dist/sight_range));
         acceleration.add(&force);
     });
 }
